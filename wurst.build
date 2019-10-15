@@ -1,3 +1,4 @@
 ---
 projectName: Wurst Noise Library
-
+dependencies:
+- https://github.com/wurstscript/wurstStdlib2
