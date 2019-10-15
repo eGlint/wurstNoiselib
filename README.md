@@ -1,6 +1,7 @@
 # Wurst Noise Library
 
 [![CircleCI](https://circleci.com/gh/eGlint/wurstNoiselib.svg?style=svg)](https://circleci.com/gh/eGlint/wurstNoiselib)
+
 [Version 1.0.1](CHANGELOG.md)
 
 This repository contains [Kenneth Perlin's Improved Noise](https://mrl.nyu.edu/~perlin/noise/) and implemented it to Wurst.
