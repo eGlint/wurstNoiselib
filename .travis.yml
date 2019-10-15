@@ -4,11 +4,11 @@ services:
   - docker
 
 before_install:
-  - docker pull eGlint/wurstnoiselib
-  - docker run -it -d --name build eGlint/wurstNoiselib /bin/sh
+  - docker pull eglint/wurstNoiselib
+  - docker run -it -d --name build eglint/wurstNoiselib /bin/sh
 
 install:
-  - docker exec build grill install eGlint/wurstNoiselib
+  - docker exec build grill install eglint/wurstNoiselib
   - docker exec build git clone https://github.com/$TRAVIS_REPO_SLUG.git target
   - docker exec build /bin/sh -c "mv -v target/* target/.* . 2>/dev/null; true"
   - docker exec build git checkout -qf $TRAVIS_COMMIT
