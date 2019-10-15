@@ -4,8 +4,7 @@ services:
   - docker
 
 before_install:
-  - docker pull frotty/wurstStdlib2
-  - docker pull eGlint/wurstNoiselib
+  - docker pull eGlint/wurstnoiselib
   - docker run -it -d --name build eGlint/wurstNoiselib /bin/sh
 
 install:
