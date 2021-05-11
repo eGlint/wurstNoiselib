@@ -1,5 +1,11 @@
 # Changelogs for Wurst Noise Library
 
+    v1.2.0
+        - Added Noise.initialize, and it is called during initialization by default
+        - Added NoiseRandom interface
+        - Added a new overload for Noise.generateRandomPermutation: Noise.generateRandomPermutation(NoiseRandom)
+        - Added Noise.version
+
     v1.1.0
         - Added the Noise.openSimplex(vec2) function
         - Now supports chillup [#1]

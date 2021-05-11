@@ -1,0 +1,4 @@
+package NoiseRandom
+
+public interface NoiseRandom 
+    abstract function getRandomInt(int low, int high) returns int

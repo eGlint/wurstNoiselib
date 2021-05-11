@@ -1,5 +1,5 @@
 /*
-    Noise Wurst v1.1.0
+    Noise Wurst v1.2.0
 
     Port by Glint
     Perlin Noise by Kenneth Perlin, https://mrl.nyu.edu/~perlin/noise/
@@ -8,6 +8,7 @@
 package Noise
 
 import NoWurst
+import NoiseRandom
 import Integer
 import Vectors
 import Wurstunit
@@ -44,7 +45,6 @@ function grad(int hash, vec3 vec) returns real
 function real.fade () returns real
     return this * this * this * (this * (this * 6. - 15.) + 10.)
 
-
 // 2D Open Simplex Constants
 constant var STRETCH_CONSTANT_2D = -0.21132486  //5405187 <- additional values when double
 constant var SQUISH_CONSTANT_2D = 0.36602540    //3784439 <- additional values when double
@@ -68,6 +68,11 @@ function extrapolate(vec2 vecsb, vec2 dvec) returns real
     A static class that contains noise functions.
 */
 public class Noise 
+    /**
+        The current version of the Noise Library.
+    */
+    constant string getVersion = "1.2.0"
+
     /**
         Permutation 
     */
@@ -198,15 +203,35 @@ public class Noise
             attn_ext *= attn_ext
             value += attn_ext * attn_ext * extrapolate(vecsv_ext, dvec_ext)
         return value / NORM_CONSTANT_2D
+
+    /**
+        Generate Random Permutation 
+        Generates random values in the permutation table
+        Sample Usage:
+        let myCustomPrng = new MyCustomPRNG("Seed")
+        generateRandomPermutation (low, high) ->
+            return myCustomPrng.getRandomInt(low, high)
+    */
+    static function generateRandomPermutation(NoiseRandom random)
+        for i = 0 to 255
+            p[i] = random.getRandomInt(0, 255)
+            p[i + 256] = p [i]
                   
     /**
         Generate Random Permutation 
         Generates random values in the permutation table. 
+        Uses Warcraft III's GetRandomInt to generate numbers.
     */
     static function generateRandomPermutation()
         for i = 0 to 255
             p[i] = GetRandomInt(0, 255)
             p[i + 256] = p [i]
+
+    static function initialize()
+        generateRandomPermutation()
+
+init
+    Noise.initialize()
 
 @Test 
 function testNoise()
