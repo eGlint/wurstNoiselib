@@ -49,19 +49,23 @@ function real.fade () returns real
 constant var STRETCH_CONSTANT_2D = -0.21132486  //5405187 <- additional values when double
 constant var SQUISH_CONSTANT_2D = 0.36602540    //3784439 <- additional values when double
 constant var NORM_CONSTANT_2D = 47
+constant var PMASK = 255
+constant var PSIZE = 256
 constant var gradT2D = [
-    5,  2,   2,  5,
-    -5,  2,  -2,  5,
-    5, -2,   2, -5,
-    -5, -2,  -2, -5
+    5,   2,  2,  5,
+    -2,  5, -5,  2,
+    -5, -2, -2, -5,
+    2,  -5,  5, -2
 ]
+
+constant vec2 SQUISH_CONSTANT_2_VEC = vec2(2* SQUISH_CONSTANT_2D, 2* SQUISH_CONSTANT_2D)
 
 /**
     2D Extrapolate
 */
 function extrapolate(vec2 vecsb, vec2 dvec) returns real
-    let index = Noise.p[(Noise.p[vecsb.x.toInt().bitAnd(255)] + vecsb.y.toInt()).bitAnd(255)].bitAnd(15)
-    return gradT2D[index] * dvec.x + gradT2D[index] * dvec.y
+    let index = Noise.p[Noise.p[vecsb.x.toInt().bitAnd(PMASK)].bitXor(vecsb.y.toInt().bitAnd(PMASK))].bitAnd(15)
+    return gradT2D[index] * dvec.x + gradT2D[((index + 1) % 16).toInt()] * dvec.y
 
 /**
     Noise
@@ -165,7 +169,6 @@ public class Noise
             attn2 *= attn2 
             value += attn2 * attn2 * extrapolate(vecsb + vec2(0,1), dvec2)
         real zins
-        real lsquish 
         if inSum <= 1
             zins = 1 - inSum
             if zins > vecins.x or zins > vecins.y
@@ -176,24 +179,22 @@ public class Noise
                     vecsv_ext = vecsb + vec2(-1, 1)
                     dvec_ext = dvec0 + vec2(1, -1)
             else
-                lsquish = 2 * SQUISH_CONSTANT_2D
                 vecsv_ext = vecsb + vec2(1, 1)
-                dvec_ext = dvec0 + vec2(-1, -1) - vec2(lsquish, lsquish)
+                dvec_ext = dvec0 + vec2(-1, -1) - SQUISH_CONSTANT_2_VEC
         else 
             zins = 2 - inSum
-            lsquish = 2 * SQUISH_CONSTANT_2D
-            if zins > vecins.x or zins > vecins.y
+            if zins < vecins.x or zins < vecins.y
                 if vecins.x > vecins.y
                     vecsv_ext = vecsb + vec2(2, 0)
-                    dvec_ext = dvec0 + vec2(-2, 0) - vec2(lsquish, lsquish)
+                    dvec_ext = dvec0 + vec2(-2, 0) - SQUISH_CONSTANT_2_VEC
                 else 
                     vecsv_ext = vecsb + vec2(0, 2)
-                    dvec_ext = dvec0 + vec2(0, -2) - vec2(lsquish, lsquish)
+                    dvec_ext = dvec0 + vec2(0, -2) - SQUISH_CONSTANT_2_VEC
             else 
-                vecsv_ext = vecsb + vec2(1, 1)
-                dvec_ext = dvec0 + vec2(-1, -1) - vec2(lsquish, lsquish)
+                vecsv_ext = vecsb
+                dvec_ext = dvec0
             vecsb += vec2(1, 1)
-            dvec0 = dvec0 - vec2(1, 1) - vec2(lsquish, lsquish)
+            dvec0 = dvec0 - vec2(1, 1) - SQUISH_CONSTANT_2_VEC
         var attn0 = 2 - dvec0.x * dvec0.x - dvec0.y * dvec0.y
         if attn0 > 0
             attn0 *= attn0
