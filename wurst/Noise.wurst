@@ -50,18 +50,20 @@ constant var STRETCH_CONSTANT_2D = -0.21132486  //5405187 <- additional values w
 constant var SQUISH_CONSTANT_2D = 0.36602540    //3784439 <- additional values when double
 constant var NORM_CONSTANT_2D = 47
 constant var gradT2D = [
-    5,  2,   2,  5,
-    -5,  2,  -2,  5,
-    5, -2,   2, -5,
-    -5, -2,  -2, -5
+    vec2(5, 2),  vec2(2, 5),
+    vec2(-2, 5), vec2(-5, 2),
+    vec2(-5, -2), vec2(-2, -5),
+    vec2(2, -5),  vec2(5, -2)
 ]
+
+constant vec2 SQUISH_CONSTANT_2_VEC = vec2(2* SQUISH_CONSTANT_2D, 2* SQUISH_CONSTANT_2D)
 
 /**
     2D Extrapolate
 */
 function extrapolate(vec2 vecsb, vec2 dvec) returns real
-    let index = Noise.p[(Noise.p[vecsb.x.toInt().bitAnd(255)] + vecsb.y.toInt()).bitAnd(255)].bitAnd(15)
-    return gradT2D[index] * dvec.x + gradT2D[index] * dvec.y
+    let index = Noise.p[Noise.p[vecsb.x.toInt().bitAnd(255)].bitXor(vecsb.y.toInt().bitAnd(255))].bitAnd(7)
+    return gradT2D[index].x * dvec.x + gradT2D[index].y * dvec.y
 
 /**
     Noise
@@ -165,7 +167,6 @@ public class Noise
             attn2 *= attn2 
             value += attn2 * attn2 * extrapolate(vecsb + vec2(0,1), dvec2)
         real zins
-        real lsquish 
         if inSum <= 1
             zins = 1 - inSum
             if zins > vecins.x or zins > vecins.y
@@ -176,24 +177,22 @@ public class Noise
                     vecsv_ext = vecsb + vec2(-1, 1)
                     dvec_ext = dvec0 + vec2(1, -1)
             else
-                lsquish = 2 * SQUISH_CONSTANT_2D
                 vecsv_ext = vecsb + vec2(1, 1)
-                dvec_ext = dvec0 + vec2(-1, -1) - vec2(lsquish, lsquish)
+                dvec_ext = dvec0 + vec2(-1, -1) - SQUISH_CONSTANT_2_VEC
         else 
             zins = 2 - inSum
-            lsquish = 2 * SQUISH_CONSTANT_2D
-            if zins > vecins.x or zins > vecins.y
+            if zins < vecins.x or zins < vecins.y
                 if vecins.x > vecins.y
                     vecsv_ext = vecsb + vec2(2, 0)
-                    dvec_ext = dvec0 + vec2(-2, 0) - vec2(lsquish, lsquish)
+                    dvec_ext = dvec0 + vec2(-2, 0) - SQUISH_CONSTANT_2_VEC
                 else 
                     vecsv_ext = vecsb + vec2(0, 2)
-                    dvec_ext = dvec0 + vec2(0, -2) - vec2(lsquish, lsquish)
+                    dvec_ext = dvec0 + vec2(0, -2) - SQUISH_CONSTANT_2_VEC
             else 
-                vecsv_ext = vecsb + vec2(1, 1)
-                dvec_ext = dvec0 + vec2(-1, -1) - vec2(lsquish, lsquish)
+                vecsv_ext = vecsb
+                dvec_ext = dvec0
             vecsb += vec2(1, 1)
-            dvec0 = dvec0 - vec2(1, 1) - vec2(lsquish, lsquish)
+            dvec0 = dvec0 - vec2(1, 1) - SQUISH_CONSTANT_2_VEC
         var attn0 = 2 - dvec0.x * dvec0.x - dvec0.y * dvec0.y
         if attn0 > 0
             attn0 *= attn0
@@ -272,7 +271,63 @@ function testNoise()
     assertTrue(Noise.perlin(vec3(1, 1, 1)) == 0)
 
     // 2D Open Simplex
-    assertTrue(Noise.openSimplex(vec2(0.1, 0.1)) == 0.1296945)
-    assertTrue(Noise.openSimplex(vec2(0.24, -0.71)) == -0.03750664)
-    assertTrue(Noise.openSimplex(vec2(-0.86, -0.57)) == 0.24364214)
-    assertTrue(Noise.openSimplex(vec2(1, 1)) == -0.03702663)
+    assertTrue(Noise.openSimplex(vec2(0.1, 0.1)) == 0.22610725)
+    assertTrue(Noise.openSimplex(vec2(0.24, -0.71)) == -0.28248793)
+    assertTrue(Noise.openSimplex(vec2(-0.86, -0.57)) == -0.49843946)
+    assertTrue(Noise.openSimplex(vec2(1, 1)) == -0.6867029)
+
+
+
+// @Test
+// function visualTest()
+//     Noise.generateRandomPermutation()
+
+//     // 2D Perlin
+//     print("\n\n Perlin")
+//     let width = 55
+//     let height = 90
+//     let scale = 10
+//     for x = 0 to width - 1
+//         var sval = ""
+//         for y = 0 to height - 1
+//             let nx = x / width
+//             let ny = y / height
+//             let val = (Noise.perlin(vec2(nx * scale, ny * scale)))
+//             if val > -0.4
+//                 if val > -0.2
+//                     if val > 0.2
+//                         if val > 0.6
+//                             sval += "."
+//                         else
+//                             sval += "_"
+//                     else
+//                         sval += "-"
+//                 else
+//                     sval += "="
+//             else
+//                 sval += "T"
+                    
+//         print(sval)
+//     // 2D Open Simplex
+//     print("\n\n Open Simplex")
+//     for x = 0 to width - 1
+//         var sval = ""
+//         for y = 0 to height - 1
+//             let nx = x / width - 0.5
+//             let ny = y / height - 0.5
+//             let val = (Noise.openSimplex(vec2(nx * scale, ny * scale)))
+//             if val > -0.4
+//                 if val > -0.2
+//                     if val > 0.2
+//                         if val > 0.6
+//                             sval += "."
+//                         else
+//                             sval += "_"
+//                     else
+//                         sval += "-"
+//                 else
+//                     sval += "="
+//             else
+//                 sval += "T"
+                    
+//         print(sval)
