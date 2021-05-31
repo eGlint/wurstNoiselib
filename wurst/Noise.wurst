@@ -1,7 +1,8 @@
 /*
-    Noise Wurst v1.2.0
+    Noise Wurst v1.2.1
 
-    Port by Glint
+    Source: https://github.com/eGlint/wurstNoiselib
+    Contributors: https://github.com/eGlint/wurstNoiselib/contributors
     Perlin Noise by Kenneth Perlin, https://mrl.nyu.edu/~perlin/noise/
     Open Simplex by Kurt Spencer, https://gist.github.com/KdotJPG/b1270127455a94ac5d19
 */
@@ -13,6 +14,7 @@ import Integer
 import Vectors
 import Wurstunit
 import Interpolation
+// import Printing // Uncomment if running visualTest()
 
 /**
     1D Gradient
@@ -49,20 +51,21 @@ function real.fade () returns real
 constant var STRETCH_CONSTANT_2D = -0.21132486  //5405187 <- additional values when double
 constant var SQUISH_CONSTANT_2D = 0.36602540    //3784439 <- additional values when double
 constant var NORM_CONSTANT_2D = 47
+constant var PMASK = 255
 constant var gradT2D = [
-    vec2(5, 2),  vec2(2, 5),
-    vec2(-2, 5), vec2(-5, 2),
+    vec2( 5,  2), vec2( 2,  5),
+    vec2(-2,  5), vec2(-5,  2),
     vec2(-5, -2), vec2(-2, -5),
-    vec2(2, -5),  vec2(5, -2)
+    vec2( 2, -5), vec2( 5, -2)
 ]
 
-constant vec2 SQUISH_CONSTANT_2_VEC = vec2(2* SQUISH_CONSTANT_2D, 2* SQUISH_CONSTANT_2D)
+constant vec2 SQUISH_CONSTANT_2D_VEC = vec2(2 * SQUISH_CONSTANT_2D, 2 * SQUISH_CONSTANT_2D)
 
 /**
     2D Extrapolate
 */
 function extrapolate(vec2 vecsb, vec2 dvec) returns real
-    let index = Noise.p[Noise.p[vecsb.x.toInt().bitAnd(255)].bitXor(vecsb.y.toInt().bitAnd(255))].bitAnd(7)
+    let index = Noise.p[Noise.p[vecsb.x.toInt().bitAnd(PMASK)].bitXor(vecsb.y.toInt().bitAnd(PMASK))].bitAnd(7)
     return gradT2D[index].x * dvec.x + gradT2D[index].y * dvec.y
 
 /**
@@ -73,7 +76,7 @@ public class Noise
     /**
         The current version of the Noise Library.
     */
-    constant string getVersion = "1.2.0"
+    constant string getVersion = "1.2.1"
 
     /**
         Permutation 
@@ -106,8 +109,8 @@ public class Noise
         let A = p[X] + Y
         let B = p[X + 1] + Y
         
-        return linear(linear(u, grad(p[A], lvec), grad(p[B], lvec - vec2(1, 0))), 
-                      linear(u, grad(p[A + 1], lvec - vec2(0, 1)), grad(p[B + 1], lvec - vec2(1, 1))),  
+        return linear(linear(grad(p[A], lvec), grad(p[B], lvec - vec2(1, 0)), u), 
+                      linear(grad(p[A + 1], lvec - vec2(0, 1)), grad(p[B + 1], lvec - vec2(1, 1)), u),  
                       v)    
 
     /**
@@ -178,21 +181,21 @@ public class Noise
                     dvec_ext = dvec0 + vec2(1, -1)
             else
                 vecsv_ext = vecsb + vec2(1, 1)
-                dvec_ext = dvec0 + vec2(-1, -1) - SQUISH_CONSTANT_2_VEC
+                dvec_ext = dvec0 + vec2(-1, -1) - SQUISH_CONSTANT_2D_VEC
         else 
             zins = 2 - inSum
             if zins < vecins.x or zins < vecins.y
                 if vecins.x > vecins.y
                     vecsv_ext = vecsb + vec2(2, 0)
-                    dvec_ext = dvec0 + vec2(-2, 0) - SQUISH_CONSTANT_2_VEC
+                    dvec_ext = dvec0 + vec2(-2, 0) - SQUISH_CONSTANT_2D_VEC
                 else 
                     vecsv_ext = vecsb + vec2(0, 2)
-                    dvec_ext = dvec0 + vec2(0, -2) - SQUISH_CONSTANT_2_VEC
+                    dvec_ext = dvec0 + vec2(0, -2) - SQUISH_CONSTANT_2D_VEC
             else 
                 vecsv_ext = vecsb
                 dvec_ext = dvec0
             vecsb += vec2(1, 1)
-            dvec0 = dvec0 - vec2(1, 1) - SQUISH_CONSTANT_2_VEC
+            dvec0 = dvec0 - vec2(1, 1) - SQUISH_CONSTANT_2D_VEC
         var attn0 = 2 - dvec0.x * dvec0.x - dvec0.y * dvec0.y
         if attn0 > 0
             attn0 *= attn0
@@ -259,9 +262,9 @@ function testNoise()
     assertTrue(Noise.perlin(1) == 0)
     
     // 2D Perlin Noise
-    assertTrue(Noise.perlin(vec2(0.1, 0.1)) == -0.006584215)
-    assertTrue(Noise.perlin(vec2(0.24, -0.71)) == -0.14477593)
-    assertTrue(Noise.perlin(vec2(-0.86, -0.57)) == -0.18754706)
+    assertTrue(Noise.perlin(vec2(0.1, 0.1)) == 0.015144216)
+    assertTrue(Noise.perlin(vec2(0.24, -0.71)) == -0.06949358)
+    assertTrue(Noise.perlin(vec2(-0.86, -0.57)) == -0.0025302172)
     assertTrue(Noise.perlin(vec2(1, 1)) == 0)
 
     // 3D Perlin Noise
