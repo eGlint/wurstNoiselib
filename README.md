@@ -1,8 +1,8 @@
-# Wurst Noise Library
+# Wurst Noise Library (Circle CI Test)
 
 [![CircleCI](https://circleci.com/gh/eGlint/wurstNoiselib.svg?style=svg)](https://circleci.com/gh/eGlint/wurstNoiselib)
 
-[Version 1.2.0](CHANGELOG.md)
+[Version 1.2.0](CHANGELOG.md) 
 
 This repository contains [Kenneth Perlin's Improved Noise](https://mrl.nyu.edu/~perlin/noise/), [Kurt Spencer's Open Simplex](https://gist.github.com/KdotJPG/b1270127455a94ac5d19), and implemented it to Wurst.
 
