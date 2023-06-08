@@ -13,6 +13,10 @@ jobs:
       - run:
           name: Update Wurst
           command: grill install wurstscript
+          
+      - run:
+          name: Update grill
+          command: grill install grill
 
       - run:
           name: Install Dependencies
