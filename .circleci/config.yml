@@ -2,7 +2,6 @@ version: 2
 
 jobs:
   build:
-    working_directory: ~/wurstNoiselib
 
     docker:
       - image: frotty/wurstscript
@@ -13,10 +12,6 @@ jobs:
       - run:
           name: Update Wurst
           command: grill install wurstscript
-          
-      - run:
-          name: Update grill
-          command: grill install grill
 
       - run:
           name: Install Dependencies
